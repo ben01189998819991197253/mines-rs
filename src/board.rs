@@ -43,17 +43,37 @@ impl Board {
     }
 }
 
+/// Returns indices of the 3-8 tiles surrounding some `index`.
+///
+/// For a 1D array set up like a 2D array with a `width` and a
+/// `length`, finds and returns the indices of the surrounding
+/// tiles. For example: given the 4x4 grid below:
+///
+/// ```text
+/// In 1D: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+/// In 2D:
+/// +-----------+
+/// |0  1  2  3 |
+/// |4  5  6  7 |
+/// |8  9  10 11|
+/// |12 13 14 15|
+/// +-----------+
+/// width == 4, length == 16
+/// ```
+/// 
+/// `get_surrounding_tiles(5, 4, 16)` yields `[0, 1, 2, 4, 6, 8, 9, 10]`.
 fn get_surrounding_tiles(index: usize, width: usize, length: usize) -> Vec<usize> {
     let mut indices: Vec<usize> = Default::default();
 
-    // NOTE: This will behave badly with grids of length <= 9
+    // NOTE: This will behave badly with grids of length < 9
     // (although WHY would you even do that?)
+    // Definitely do not use with grids that are not at least 3x3
 
     // Lots of literal edge cases to detect :(
     // The corners must be checked first, THEN the sides.
     // HOW TO DERIVE THE MAGIC NUMBERS:
     // 1. Make an arbitrary grid, I did a 5x4 one.
-    // 2. Number them sequentially, 0..length
+    // 2. Number the tiles sequentially, [0, length)
     // 3. For each corner or edge, sketch out what the 3x3 section would look like
     //    if it were a whole piece (it's not, because it's on an edge/corner)
     // 4. Figure out the relationship between the index and the indices of the
