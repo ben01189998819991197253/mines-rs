@@ -283,7 +283,7 @@ impl Board {
             }
 
             let indices = self.adjacent_tile_indices(index);
-            let mut num_bombs: u32 = 0;
+            let mut num_bombs: usize = 0;
             for i in &indices {
                 if self.tiles[*i].borrow().is_bomb {
                     num_bombs += 1;

@@ -13,7 +13,7 @@ pub struct Tile {
     /// revealed. A value of 2 would indicate the `Tile` is adjacent
     /// to 2 bombs, a value of 0 would mean it isn't surrounded by any
     /// bombs, etc.
-    pub adjacent_bombs: u32,
+    pub adjacent_bombs: usize,
     /// Refers to the current condition of this `Tile`.
     pub state: TileState,
     /// Indicates whether this `Tile` is a bomb.
