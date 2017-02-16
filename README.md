@@ -35,6 +35,44 @@ cargo doc --no-deps --open
 in the crate root. It will automatically open in your default web
 browser.
 
+### Quickstart
+
+Assuming you've included the crate with your project:
+
+```rust
+extern crate mines;
+
+use mines::Board;
+
+fn main() {
+   // Default 8x8 grid with 10 mines
+   let board = Board::default();
+
+   // Reveal the tile at (0, 4)
+   let index = board.linear_coords((0, 4));
+
+   // Revealing a tile returns a Result<_, &'static str> depending on
+   // whether it was able to flood-reveal the tiles
+   let result = board.reveal_tile(index);
+   assert_eq!(Ok(()), result);
+
+   println!("{}", board);
+}
+```
+
+Example output:
+
+```
+????????
+12??????
+.124????
+...2????
+...2????
+...111??
+11...1??
+?1...1??
+```
+
 ## Contributing
 
 ...is welcomed! Please submit any and all pull requests or issues.
