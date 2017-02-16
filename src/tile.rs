@@ -1,11 +1,8 @@
 #![warn(missing_docs)]
 
 use std::fmt;
-use std::fmt::{Debug, Display};
 use std::result::Result;
 use std::default::Default;
-
-use board::Board;
 
 /// `Tile` represents one square on a standard Minesweeper board.
 #[derive(Clone)]
@@ -25,6 +22,12 @@ impl Tile {
     /// Marks this `Tile` as revealed, allowing the user to see its
     /// value. Returns a `Result` indicating whether the reveal was
     /// successful.
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if the `Tile` was not in a
+    /// revealable `TileState`, such as if it is already revealed. It
+    /// is safe to discard this error; it is only for the programmer.
     pub fn reveal(&mut self) -> Result<(), &'static str> {
         match self.state {
             TileState::Hidden | TileState::Revealed => {
@@ -35,9 +38,15 @@ impl Tile {
         }
     }
 
-    /// Toggles this `Tile` as flagged, preventing or allowing
-    /// revealing it (and uncovering a bomb.) Returns a `Result`
-    /// indicating whether the flag was successful.
+    /// Toggles this `Tile` as flagged. If it is flagged, the user
+    /// will not be able to reveal it (and uncover a bomb). Returns a
+    /// `Result` indicating whether the flag was successful.
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if the `Tile` was not in a
+    /// flaggable `TileState`, such as if it is already revealed. It
+    /// is safe to discard this error; it is only for the programmer.
     pub fn flag(&mut self) -> Result<(), &'static str> {
         match self.state {
             TileState::Hidden => {
@@ -63,19 +72,19 @@ impl Default for Tile {
     }
 }
 
-impl Debug for Tile {
+impl fmt::Debug for Tile {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // "What gets printed to the screen?"
         // In order of priority:
         // 1. Whether it's a bomb
         // 2. Whether it's adjacent to bombs
         // 3. Whether it's not adjacent to bombs
-        let adjacent_bombs_string = self.adjacent_bombs.to_string();
+        let adjacent_bombs = self.adjacent_bombs.to_string();
 
         let s = if self.is_bomb {
             "*"
-        } else if adjacent_bombs_string != "0" {
-            adjacent_bombs_string.as_str()
+        } else if adjacent_bombs != "0" {
+            adjacent_bombs.as_str()
         } else {
             "."
         };
@@ -84,7 +93,7 @@ impl Debug for Tile {
     }
 }
 
-impl Display for Tile {
+impl fmt::Display for Tile {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // "What gets printed to the screen?"
         // In order of priority:
