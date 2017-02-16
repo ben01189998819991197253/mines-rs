@@ -1,66 +1,67 @@
 #![warn(missing_docs)]
-//! Contains methods for creating and maniuplating
-//! Minesweeper boards.
-//!
-//! # Examples
-//!
-//! Instantiating a new `Board`:
-//!
-//! ```
-//! use mines::board::Board;
-//!
-//! // A default 8x8 board
-//! let b: Board = Default::default();
-//! // Reveal the 8th tile using a linear index
-//! let result = b.reveal_tile(7);
-//! // Ensure the operation was a success
-//! assert_eq!(Ok(()), result);
-//! // Get the index of the tile in the bottom-right corner
-//! let index = b.linear_coords((7, 7));
-//! b.reveal_tile(index);
-//! // Print what the user should see to stdout
-//! println!("{}", b);
-//! ```
-//!
-//! Example output:
-//!
-//! ```text
-//! ?????1.. <-- The revealed tile
-//! ?????1..
-//! ?????21.
-//! ??????21
-//! ????????
-//! ????????
-//! ????????
-//! ???????* <-- Other revealed tile
-//! ```
-//!
-//! Debugging the creation of a custom-sized `Board`:
-//!
-//! ```
-//! # use mines::board::Board;
-//! // A 9x9 board with 20 mines
-//! let b: Board = Board::new(9, 9, 20);
-//! // The board will NOT be generated until
-//! // an initial tile is revealed
-//! b.reveal_tile(0);
-//! // See the debug output
-//! println!("{:?}", b);
-//! ```
-//!
-//! Example output:
-//!
-//! ```text
-//! .1*23*311
-//! .12*4*3*2
-//! .135*322*
-//! .1***2.11
-//! .12322121
-//! 111111*3*
-//! *12*3214*
-//! 112**223*
-//! ..123*2*2
-//! ```
+/*! [Re-exported] Data structures and methods for creating and
+maniuplating Minesweeper boards.
+
+# Examples
+
+Instantiating a new `Board`:
+
+```
+use mines::Board;
+
+// A default 8x8 board
+let b: Board = Default::default();
+// Reveal the 8th tile using a linear index
+let result = b.reveal_tile(7);
+// Ensure the operation was a success
+assert_eq!(Ok(()), result);
+// Get the index of the tile in the bottom-right corner
+let index = b.linear_coords((7, 7));
+b.reveal_tile(index);
+// Print what the user should see to stdout
+println!("{}", b);
+```
+
+Example output:
+
+```text
+?????1.. <-- The revealed tile
+?????1..
+?????21.
+??????21
+????????
+????????
+????????
+???????* <-- Other revealed tile
+```
+
+Debug-printing a custom-sized `Board`:
+
+```
+# use mines::Board;
+// A 9x9 board with 20 mines
+let b: Board = Board::new(9, 9, 20);
+// The board will NOT be generated until
+// an initial tile is revealed
+b.reveal_tile(0);
+// See the debug output
+println!("{:?}", b);
+```
+
+Example output:
+
+```text
+.1*23*311
+.12*4*3*2
+.135*322*
+.1***2.11
+.12322121
+111111*3*
+*12*3214*
+112**223*
+..123*2*2
+```
+*/
 
 
 use std::cell::{Cell, RefCell};
@@ -74,7 +75,7 @@ use tile::{Tile, TileState};
 
 extern crate rand;
 
-/// `Board` represents a standard Minesweeper board with tiles.
+/// Representation of a standard Minesweeper board.
 #[derive(Clone)]
 pub struct Board {
     /// The total number of bombs (revealed or not) on the

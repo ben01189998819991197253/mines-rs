@@ -1,13 +1,12 @@
 #![warn(missing_docs)]
-//! Individual tiles on a Minesweeper board.
-//!
-//! It's probably a better idea to use the methods defined in the
-//! `board` module.
+//! [Re-exported] Methods and data structures for individual tiles on
+//! a Minesweeper board.
+
 use std::fmt;
 use std::result::Result;
 use std::default::Default;
 
-/// `Tile` represents one square on a standard Minesweeper board.
+/// Representation of one square on a standard Minesweeper board.
 #[derive(Clone)]
 pub struct Tile {
     /// Corresponds to what one would see if this `Tile` were
@@ -117,7 +116,7 @@ impl fmt::Display for Tile {
     }
 }
 
-/// `TileState` corresponds to the current condition of a `Tile`.
+/// Corresponds to the current condition of a `Tile`.
 #[derive(Clone)]
 pub enum TileState {
     /// The `Tile` has not been clicked on, and has an unknown value
