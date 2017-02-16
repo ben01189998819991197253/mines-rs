@@ -1,4 +1,67 @@
 #![warn(missing_docs)]
+//! Contains methods for creating and maniuplating
+//! Minesweeper boards.
+//!
+//! # Examples
+//!
+//! Instantiating a new `Board`:
+//!
+//! ```
+//! use mines::board::Board;
+//!
+//! // A default 8x8 board
+//! let b: Board = Default::default();
+//! // Reveal the 8th tile using a linear index
+//! let result = b.reveal_tile(7);
+//! // Ensure the operation was a success
+//! assert_eq!(Ok(()), result);
+//! // Get the index of the tile in the bottom-right corner
+//! let index = b.linear_coords((7, 7));
+//! b.reveal_tile(index);
+//! // Print what the user should see to stdout
+//! println!("{}", b);
+//! ```
+//!
+//! Example output:
+//!
+//! ```text
+//! ?????1.. <-- The revealed tile
+//! ?????1..
+//! ?????21.
+//! ??????21
+//! ????????
+//! ????????
+//! ????????
+//! ???????* <-- Other revealed tile
+//! ```
+//!
+//! Debugging the creation of a custom-sized `Board`:
+//!
+//! ```
+//! # use mines::board::Board;
+//! // A 9x9 board with 20 mines
+//! let b: Board = Board::new(9, 9, 20);
+//! // The board will NOT be generated until
+//! // an initial tile is revealed
+//! b.reveal_tile(0);
+//! // See the debug output
+//! println!("{:?}", b);
+//! ```
+//!
+//! Example output:
+//!
+//! ```text
+//! .1*23*311
+//! .12*4*3*2
+//! .135*322*
+//! .1***2.11
+//! .12322121
+//! 111111*3*
+//! *12*3214*
+//! 112**223*
+//! ..123*2*2
+//! ```
+
 
 use std::cell::{Cell, RefCell};
 use std::default::Default;
@@ -16,7 +79,7 @@ extern crate rand;
 pub struct Board {
     /// The total number of bombs (revealed or not) on the
     /// `Board`.
-    pub num_mines: u32,
+    pub num_mines: usize,
     /// Keeps track of whether the `Board` has been generated.
     was_generated: Cell<bool>,
     /// The horizontal width.
@@ -74,6 +137,34 @@ impl fmt::Display for Board {
 }
 
 impl Board {
+    /// Creates a new `Board`.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the programmer attempts to make a
+    /// `Board` smaller than 3x3, or if there are too many mines to
+    /// make a functioning `Board`. There must be fewer than (`width`
+    /// * `height` - 9) mines.
+    pub fn new(width: usize, height: usize, num_mines: usize) -> Board {
+        if width * height <= 9 {
+            panic!("Tried to make too small of a board!");
+        }
+        if num_mines >= (width * height) - 9 {
+            panic!("Too many mines to make a functioning board! Mines passed: {}, Maximum mines: \
+                    {}",
+                   num_mines,
+                   (width * height) - 10);
+        }
+
+        Board {
+            num_mines: num_mines,
+            was_generated: Cell::new(false),
+            width: width,
+            height: height,
+            tiles: vec![RefCell::new(Tile::default()); width * height],
+        }
+    }
+
     /// Returns the indices of any adjacent tiles.
     ///
     /// `Board` represents its grid of tiles as a one-dimensional
@@ -104,7 +195,7 @@ impl Board {
         adjacent_indices(index, self.width, self.tiles.len())
     }
 
-    /// Flood reveals any available `Tiles`, allowing the user to see
+    /// Flood-reveals any available `Tiles`, allowing the user to see
     /// their values. Returns a `Result` indicating whether the
     /// reveals were successful.
     ///
@@ -113,8 +204,8 @@ impl Board {
     ///
     /// # Errors
     ///
-    /// This function will return an error if the `Tile` was not in a
-    /// revealable `TileState`, such as if it is already revealed. It
+    /// This function will return an error if any `Tile` was not in a
+    /// revealable `TileState`, such as if it was already revealed. It
     /// is safe to discard this error; it is only for the programmer.
     pub fn reveal_tile(&self, index: usize) -> Result<(), &'static str> {
         if !self.was_generated.get() {
@@ -274,6 +365,85 @@ impl Board {
 
         touches_empty
     }
+
+    /// Converts an (x, y) coordinate pair to a 1D index.
+    ///
+    /// `Board` represents its grid of tiles as a one-dimensional
+    /// `Vec<Tile>`. Given a coordinate pair (x, y) referring to the
+    /// location of `Tile`, this function will return the 1D index
+    /// that corresponds to that `Tile`.
+    ///
+    /// # Examples
+    ///
+    /// Finding the index from coordinates of the `Tile` at (3, 4):
+    ///
+    /// ```
+    /// use mines::board::Board;
+    ///
+    /// // An 8x8 Board
+    /// let b: Board = Default::default();
+    /// let tile_index = b.linear_coords((3, 4));
+    /// assert_eq!(tile_index, 35);
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the programmer passes a coordinate
+    /// pair that is not within the bounds of the grid.
+    pub fn linear_coords(&self, p: (usize, usize)) -> usize {
+        if p.0 >= self.width || p.1 >= self.height {
+            panic!("Tried to get the index of a Tile that wasn't within the bounds of the grid! \
+                    Coordinates passed: ({}, {}), Grid bounds: {}x{}",
+                   p.0,
+                   p.1,
+                   self.width,
+                   self.height);
+        }
+        linear_coords(p, self.width)
+    }
+
+    /// Converts a 1D index to an (x, y) coordinate pair.
+    ///
+    /// `Board` represents its grid of tiles as a one-dimensional
+    /// `Vec<Tile>`. Given the `index` of a `Tile`, this function will
+    /// return an (x, y) coordinate pair (zero indexed) that refers to
+    /// that `Tile`.
+    ///
+    /// # Examples
+    ///
+    /// Finding the coordinates of the first `Tile`:
+    ///
+    /// ```
+    /// use mines::board::Board;
+    ///
+    /// // An 8x8 Board
+    /// let b: Board = Default::default();
+    /// let first_tile_coords = b.cartesian_coords(0);
+    /// assert_eq!(first_tile_coords, (0, 0));
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the programmer passes an `index`
+    /// that is not within the bounds of the grid.
+    pub fn cartesian_coords(&self, index: usize) -> (usize, usize) {
+        if index >= self.tiles.len() {
+            panic!("Tried to get the coordinates of a Tile that wasn't within the bounds of the \
+                    grid! Index passed: {}, Grid length: {}",
+                   index,
+                   self.tiles.len());
+        }
+        cartesian_coords(index, self.width)
+    }
+}
+
+fn linear_coords(p: (usize, usize), width: usize) -> usize {
+    let (x, y) = p;
+    (width * y) + x
+}
+
+fn cartesian_coords(index: usize, width: usize) -> (usize, usize) {
+    (index % width, index / width)
 }
 
 fn adjacent_indices(index: usize, width: usize, length: usize) -> Vec<usize> {
@@ -379,6 +549,60 @@ fn adjacent_indices(index: usize, width: usize, length: usize) -> Vec<usize> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_linear_coords() {
+        const WIDTH: usize = 5;
+
+        struct Test {
+            p: (usize, usize),
+            expected: usize,
+        };
+
+        let tests = [Test {
+                         p: (2, 1),
+                         expected: 7,
+                     },
+                     Test {
+                         p: (4, 0),
+                         expected: 4,
+                     },
+                     Test {
+                         p: (0, 2),
+                         expected: 10,
+                     }];
+
+        for test in &tests {
+            assert_eq!(test.expected, linear_coords(test.p, WIDTH))
+        }
+    }
+
+    #[test]
+    fn test_cartesian_coords() {
+        const WIDTH: usize = 5;
+
+        struct Test {
+            index: usize,
+            expected: (usize, usize),
+        }
+
+        let tests = [Test {
+                         index: 4,
+                         expected: (4, 0),
+                     },
+                     Test {
+                         index: 6,
+                         expected: (1, 1),
+                     },
+                     Test {
+                         index: 10,
+                         expected: (0, 2),
+                     }];
+
+        for test in &tests {
+            assert_eq!(test.expected, cartesian_coords(test.index, WIDTH))
+        }
+    }
 
     #[test]
     fn test_adjacent_indices() {

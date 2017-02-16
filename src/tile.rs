@@ -1,5 +1,8 @@
 #![warn(missing_docs)]
-
+//! Individual tiles on a Minesweeper board.
+//!
+//! It's probably a better idea to use the methods defined in the
+//! `board` module.
 use std::fmt;
 use std::result::Result;
 use std::default::Default;
