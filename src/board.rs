@@ -298,7 +298,7 @@ impl Board {
         let mut result: Result<(), &'static str> = Ok(());
 
         // We use HashMap so that we do not have any duplicated values
-        // in our todo ilst
+        // in our todo list
         let mut current: HashMap<usize, usize> = HashMap::new();
         current.insert(index, index);
 
