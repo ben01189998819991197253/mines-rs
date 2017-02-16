@@ -109,9 +109,8 @@ impl fmt::Debug for Board {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s: String = String::new();
 
-        // TODO: Use enumerate() for this
-        for i in 0..self.tiles.len() {
-            s.push_str(&format!("{:?}", *self.tiles[i].borrow()));
+        for (i, tile_ref) in self.tiles.iter().enumerate() {
+            s.push_str(&format!("{:?}", *tile_ref.borrow()));
             if (i + 1) % self.width == 0 {
                 s.push_str("\n");
             }
@@ -125,9 +124,8 @@ impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s: String = String::new();
 
-        // TODO: Use enumerate() for this
-        for i in 0..self.tiles.len() {
-            s.push_str(&format!("{}", *self.tiles[i].borrow()));
+        for (i, tile_ref) in self.tiles.iter().enumerate() {
+            s.push_str(&format!("{}", *tile_ref.borrow()));
             if (i + 1) % self.width == 0 {
                 s.push_str("\n");
             }
