@@ -300,9 +300,9 @@ impl Board {
         let mut current: HashMap<usize, usize> = HashMap::new();
         current.insert(index, index);
 
-        'outer: while current.len() > 0 {
+        'outer: while !current.is_empty() {
             let mut todo: HashMap<usize, usize> = HashMap::new();
-            for (_, index) in &current {
+            for index in current.values() {
                 // Reveal the tile, quitting if there's an Err
                 {
                     let mut tile = self.tiles[*index].borrow_mut();
@@ -334,13 +334,7 @@ impl Board {
         // empty tile that has been revealed.
         match self.tiles[index].borrow().state {
             TileState::Revealed => false,
-            _ => {
-                if self.tile_touches_revealed_empty(index) {
-                    true
-                } else {
-                    false
-                }
-            }
+            _ => self.tile_touches_revealed_empty(index),
         }
     }
 
@@ -351,13 +345,17 @@ impl Board {
         for index in indices {
             let tile = self.tiles[index].borrow();
             if tile.adjacent_bombs == 0 {
-                match tile.state {
-                    TileState::Revealed => {
-                        touches_empty = true;
-                        break;
+                // match tile.state {
+                //     TileState::Revealed => {
+                //         touches_empty = true;
+                //         break;
 
-                    }
-                    _ => {}
+                //     }
+                //     _ => {}
+                // }
+                if let TileState::Revealed = tile.state {
+                    touches_empty = true;
+                    break;
                 }
             }
         }
