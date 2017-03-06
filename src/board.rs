@@ -474,68 +474,60 @@ fn adjacent_indices(index: usize, width: usize, length: usize) -> Vec<usize> {
     // 4. Figure out the relationship between the index and the indices of the
     //    expected/desired tiles that are surrounding it. Do not include tiles that
     //    are not actually part of the grid.
-    match index {
-        0 => {
-            // top-left corner
-            indices.push(index + 1);
-            indices.push(index + width);
-            indices.push(index + width + 1);
-        }
-        index if index == (width - 1) => {
-            // top-right corner
-            indices.push(width - 2);
-            indices.push(2 * width - 2);
-            indices.push(2 * width - 1);
-        }
-        index if index == (length - width) => {
-            // bottom-left corner
-            indices.push((length - width) - width);
-            indices.push((length - width) - width + 1);
-            indices.push(index + 1);
-        }
-        index if index == (length - 1) => {
-            // bottom-right corner
-            indices.push(index - width - 1);
-            indices.push(index - width);
-            indices.push(index - 1);
-        }
-        index if index % width == 0 => {
-            // left side
-            indices.push(index - width);
-            indices.push(index - width + 1);
-            indices.push(index + 1);
-            indices.push(index + width);
-            indices.push(index + width + 1);
-        }
-        index if (index + 1) % width == 0 => {
-            // right side
-            indices.push(index - width - 1);
-            indices.push(index - width);
-            indices.push(index - 1);
-            indices.push(index + width - 1);
-            indices.push(index + width);
-        }
-        _ => {
-            // Assume it's a well-behaved index
-            // Attempt to push all 8 surrounding indices
-            let index = index as i32;
-            let width = width as i32;
-            let length = length as i32;
+    if index == 0 {
+        // top-left corner
+        indices.push(index + 1);
+        indices.push(index + width);
+        indices.push(index + width + 1);
+    } else if index == (width - 1) {
+        // top-right corner
+        indices.push(width - 2);
+        indices.push(2 * width - 2);
+        indices.push(2 * width - 1);
+    } else if index == (length - width) {
+        // bottom-left corner
+        indices.push((length - width) - width);
+        indices.push((length - width) - width + 1);
+        indices.push(index + 1);
+    } else if index == (length - 1) {
+        // bottom-right corner
+        indices.push(index - width - 1);
+        indices.push(index - width);
+        indices.push(index - 1);
+    } else if index % width == 0 {
+        // left side
+        indices.push(index - width);
+        indices.push(index - width + 1);
+        indices.push(index + 1);
+        indices.push(index + width);
+        indices.push(index + width + 1);
+    } else if (index + 1) % width == 0 {
+        // right side
+        indices.push(index - width - 1);
+        indices.push(index - width);
+        indices.push(index - 1);
+        indices.push(index + width - 1);
+        indices.push(index + width);
+    } else {
+        // Assume it's a well-behaved index
+        // Attempt to push all 8 surrounding indices
+        let index = index as i32;
+        let width = width as i32;
+        let length = length as i32;
 
-            let is_valid = |x: i32| x >= 0 && x < length;
+        let is_valid = |x: i32| x >= 0 && x < length;
 
-            let surrounding_eight = [(index - width - 1),
-                                     (index - width),
-                                     (index - width + 1),
-                                     (index - 1),
-                                     (index + 1),
-                                     (index + width - 1),
-                                     (index + width),
-                                     (index + width + 1)];
-            for i in &surrounding_eight {
-                if is_valid(*i) {
-                    indices.push(*i as usize);
-                }
+        let surrounding_eight = [(index - width - 1),
+                                 (index - width),
+                                 (index - width + 1),
+                                 (index - 1),
+                                 (index + 1),
+                                 (index + width - 1),
+                                 (index + width),
+                                 (index + width + 1)];
+        for i in &surrounding_eight {
+            if is_valid(*i) {
+                indices.push(*i as usize);
             }
         }
     }
